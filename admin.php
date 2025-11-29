@@ -46,42 +46,55 @@ switch ($action) {
  * Авторизация пользователя (админа) -- установка значения в сессию
  */
 function login() {
-
     $results = array();
     $results['pageTitle'] = "Admin Login | Widget News";
 
     if (isset($_POST['login'])) {
 
-        // Пользователь получает форму входа: попытка авторизировать пользователя
+    $results = array();
+    $results['pageTitle'] = "Admin Login | Widget News";
 
-        if ($_POST['username'] == ADMIN_USERNAME 
-                && $_POST['password'] == ADMIN_PASSWORD) {
+    if (isset($_POST['login'])) {
+        $username = $_POST['username'];
+        $password = $_POST['password'];
 
-          // Вход прошел успешно: создаем сессию и перенаправляем на страницу администратора
-          $_SESSION['username'] = ADMIN_USERNAME;
-          header( "Location: admin.php");
-
-        } else {
-
-          // Ошибка входа: выводим сообщение об ошибке для пользователя
-          $results['errorMessage'] = "Неправильный пароль, попробуйте ещё раз.";
-          require( TEMPLATE_PATH . "/admin/loginForm.php" );
+        // Если логин admin, используем старую проверку
+        if ($username == ADMIN_USERNAME && $password == ADMIN_PASSWORD) {
+            $_SESSION['username'] = ADMIN_USERNAME;
+            $_SESSION['is_admin'] = true;
+            header("Location: admin.php");
+        } 
+        // Для других пользователей проверяем через БД
+        else {
+            $user = User::checkLogin($username, $password);
+            if ($user) {
+                $_SESSION['username'] = $user->login;
+                $_SESSION['is_admin'] = false;
+                $_SESSION['user_id'] = $user->id;
+                header("Location: admin.php");
+            } else {
+                // Проверим почему не вошел
+                $dbUser = User::getByLogin($username);
+                if ($dbUser && !$dbUser->active) {
+                    $results['errorMessage'] = "Пользователь неактивен. Обратитесь к администратору.";
+                } else {
+                    $results['errorMessage'] = "Неправильный логин или пароль, попробуйте ещё раз.";
+                }
+                require(TEMPLATE_PATH . "/admin/loginForm.php");
+            }
         }
-
     } else {
-
-      // Пользователь еще не получил форму: выводим форму
-      require(TEMPLATE_PATH . "/admin/loginForm.php");
+        require(TEMPLATE_PATH . "/admin/loginForm.php");
     }
-
 }
 
 
 function logout() {
-    unset( $_SESSION['username'] );
-    header( "Location: admin.php" );
+    unset($_SESSION['username']);
+    unset($_SESSION['is_admin']);
+    unset($_SESSION['user_id']);
+    header("Location: admin.php");
 }
-
 
 function newArticle() {
 	  
@@ -174,7 +187,7 @@ function deleteArticle() {
 function listArticles() {
     $results = array();
     
-    $data = Article::getList();
+    $data = Article::getList(1000000, null, "publicationDate DESC", false);
     $results['articles'] = $data['results'];
     $results['totalRows'] = $data['totalRows'];
     
