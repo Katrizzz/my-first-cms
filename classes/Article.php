@@ -36,6 +36,11 @@ class Article
     * @var string HTML содержание статьи
     */
     public $content = null;
+
+    /*
+    * @var bool Активность статьи
+    */
+    public $active = 1;
     
     /**
      * Создаст объект статьи
@@ -70,6 +75,8 @@ class Article
       if (isset($data['content'])) {
           $this->content = $data['content'];  
       }
+
+      $this->active = isset($data['active']) ? (int)$data['active'] : 1;
     }
 
 
@@ -127,48 +134,53 @@ class Article
     * @return Array|false Двух элементный массив: results => массив объектов Article; totalRows => общее количество строк
     */
     public static function getList($numRows=1000000, 
-            $categoryId=null, $order="publicationDate DESC") 
+            $categoryId=null, $order="publicationDate DESC", $onlyActive = true) 
     {
         $conn = new PDO(DB_DSN, DB_USERNAME, DB_PASSWORD);
         $fromPart = "FROM articles";
-        $categoryClause = $categoryId ? "WHERE categoryId = :categoryId" : "";
+        
+        // Формируем условия WHERE
+        $whereConditions = array();
+        if ($categoryId) {
+            $whereConditions[] = "categoryId = :categoryId";
+        }
+        if ($onlyActive) {
+            $whereConditions[] = "active = 1";
+        }
+
+        $whereClause = "";
+        if (!empty($whereConditions)) {
+            $whereClause = "WHERE " . implode(" AND ", $whereConditions);
+        }
+
         $sql = "SELECT *, UNIX_TIMESTAMP(publicationDate) 
                 AS publicationDate
-                $fromPart $categoryClause
+                $fromPart $whereClause
                 ORDER BY  $order  LIMIT :numRows";
         
         $st = $conn->prepare($sql);
         $st->bindValue(":numRows", $numRows, PDO::PARAM_INT);
-	/**
-	 * Можно использовать debugDumpParams() для отладки параметров, 
-	 * привязанных выше с помощью bind()
-	 * @see https://www.php.net/manual/ru/pdostatement.debugdumpparams.php
-	 */
-      
-        if ($categoryId) 
-            $st->bindValue( ":categoryId", $categoryId, PDO::PARAM_INT);
-        
-        $st->execute(); // выполняем запрос к базе данных
-        $list = array();
 
-        while ($row = $st->fetch()) {
-            $article = new Article($row);
-            $list[] = $article;
+        if ($categoryId) {
+            $st->bindValue(":categoryId", $categoryId, PDO::PARAM_INT);
         }
 
-        // Получаем общее количество статей, которые соответствуют критерию
-        $sql = "SELECT COUNT(*) AS totalRows $fromPart $categoryClause";
-	$st = $conn->prepare($sql);
-	if ($categoryId) 
-            $st->bindValue( ":categoryId", $categoryId, PDO::PARAM_INT);
-	$st->execute(); // выполняем запрос к базе данных                    
+        $st->execute();
+        $list = array();
+
+        $sql = "SELECT COUNT(*) AS totalRows $fromPart $whereClause";
+        $st = $conn->prepare($sql);
+        if ($categoryId) {
+            $st->bindValue(":categoryId", $categoryId, PDO::PARAM_INT);
+        }
+
+        $st->execute();
         $totalRows = $st->fetch();
         $conn = null;
-        
-        return (array(
-            "results" => $list, 
+
+        return array(
+            "results" => $list,
             "totalRows" => $totalRows[0]
-            ) 
         );
     }
 

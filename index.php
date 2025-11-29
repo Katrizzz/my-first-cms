@@ -1,7 +1,5 @@
 <?php
 
-//phpinfo(); die();
-
 require("config.php");
 
 try {
@@ -74,9 +72,18 @@ function viewArticle()
         throw new Exception("Статья с id = $articleId не найдена");
     }
     
+    if (!$results['article']->active) {
+        throw new Exception("Статья с id = $articleId временно недоступна");
+    }
+
+    $data = Category::getList();
+    $results['categories'] = array();
+    foreach ($data['results'] as $category) {
+        $results['categories'][$category->id] = $category;
+    }
+
     $results['category'] = Category::getById($results['article']->categoryId);
-    $results['pageTitle'] = $results['article']->title . " | Простая CMS";
-    
+
     require(TEMPLATE_PATH . "/viewArticle.php");
 }
 
@@ -86,7 +93,7 @@ function viewArticle()
 function homepage() 
 {
     $results = array();
-    $data = Article::getList(HOMEPAGE_NUM_ARTICLES);
+    $data = Article::getList(HOMEPAGE_NUM_ARTICLES, null, "publicationDate DESC", true);
     $results['articles'] = $data['results'];
     $results['totalRows'] = $data['totalRows'];
     
@@ -97,11 +104,6 @@ function homepage()
     } 
     
     $results['pageTitle'] = "Простая CMS на PHP";
-    
-//    echo "<pre>";
-//    print_r($data);
-//    echo "</pre>";
-//    die();
     
     require(TEMPLATE_PATH . "/homepage.php");
     

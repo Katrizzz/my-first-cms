@@ -30,14 +30,16 @@
                 <label for="content">Article Content</label>
                 <textarea name="content" id="content" placeholder="The HTML content of the article" required maxlength="100000" style="height: 30em;"><?php echo htmlspecialchars( $results['article']->content )?></textarea>
               </li>
-
               <li>
                 <label for="categoryId">Article Category</label>
-                <select name="categoryId">
-                  <option value="0"<?php echo !$results['article']->categoryId ? " selected" : ""?>>(none)</option>
-                <?php foreach ( $results['categories'] as $category ) { ?>
-                  <option value="<?php echo $category->id?>"<?php echo ( $category->id == $results['article']->categoryId ) ? " selected" : ""?>><?php echo htmlspecialchars( $category->name )?></option>
-                <?php } ?>
+                <select name="categoryId" id="categoryId" required>
+                  <option value="" disabled <?php echo !$results['article']->categoryId ? "selected" : "" ?>>Select a category</option>
+                  <?php foreach ($results['categories'] as $category) { ?>
+                    <option value="<?php echo $category->id ?>"
+                      <?php echo ($results['article']->categoryId == $category->id) ? "selected" : "" ?>>
+                      <?php echo htmlspecialchars($category->name) ?>
+                    </option>
+                  <?php } ?>
                 </select>
               </li>
 
@@ -46,6 +48,10 @@
                 <input type="date" name="publicationDate" id="publicationDate" placeholder="YYYY-MM-DD" required maxlength="10" value="<?php echo $results['article']->publicationDate ? date( "Y-m-d", $results['article']->publicationDate ) : "" ?>" />
               </li>
 
+              li>
+                <label for="active">Article Status</label>
+                <input type="checkbox" name="active" id="active" <?php echo $results['article']->active ? "checked" : "" ?> /> Active
+              </li>
 
             </ul>
 
