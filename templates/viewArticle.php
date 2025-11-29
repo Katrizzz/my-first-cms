@@ -11,10 +11,35 @@
             <?php echo htmlspecialchars($results['category']->name) ?>
         </a>
     <?php } ?>
+    
+    <?php if ( $results['subcategory'] ) { ?>
+        | Подкатегория: 
+        <a href="./?action=viewArticleSubcategory&amp;subcategoryId=<?php echo $results['subcategory']->id?>">
+            <?php echo htmlspecialchars($results['subcategory']->name) ?>
+        </a>
+    <?php } ?>
+    
+    <?php 
+    // ДОБАВЛЕНО: Отображение авторов
+    $authors = $results['article']->getAuthors();
+    if (!empty($authors)) { 
+        $authorLinks = array();
+        foreach ($authors as $author) {
+            if (is_array($author) && isset($author['login'])) {
+                $authorLinks[] = '<a href="./?action=viewArticleAuthor&amp;authorId=' . $author['id'] . '">' . 
+                               htmlspecialchars($author['login']) . '</a>';
+            } elseif (is_object($author) && isset($author->login)) {
+                $authorLinks[] = '<a href="./?action=viewArticleAuthor&amp;authorId=' . $author->id . '">' . 
+                               htmlspecialchars($author->login) . '</a>';
+            }
+        }
+        if (!empty($authorLinks)) { ?>
+            | Авторы: <?php echo implode(', ', $authorLinks) ?>
+        <?php } 
+    } ?>
         
     </p>
 
     <p><a href="./">Вернуться на главную страницу</a></p>
 	  
-<?php include "templates/include/footer.php" ?>    
-                
+<?php include "templates/include/footer.php" ?>

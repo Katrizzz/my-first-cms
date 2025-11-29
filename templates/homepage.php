@@ -1,4 +1,3 @@
-
 <?php include "templates/include/header.php" ?>
     <ul id="headlines">
     <?php foreach ($results['articles'] as $article) { ?>
@@ -25,7 +24,35 @@
                         <?php echo "Без категории"?>
                     </span>
                 <?php } ?>
+                
+                <!-- ВЫВОД ПОДКАТЕГОРИИ -->
+                <?php if (isset($article->subcategoryId) && isset($results['subcategories'][$article->subcategoryId])) { ?>
+                    <span class="subcategory">
+                        / 
+                        <a href=".?action=archive&amp;subcategoryId=<?php echo $article->subcategoryId?>">
+                            <?php echo htmlspecialchars($results['subcategories'][$article->subcategoryId]->name )?>
+                        </a>
+                    </span>
+                <?php } ?>
             </h2>
+
+            <!-- ДОБАВИТЬ ВЫВОД АВТОРОВ -->
+            <?php if (!empty($article->authors)) { ?>
+                <div class="authors">
+                    Authors: 
+                    <?php 
+                    $authorLinks = array();
+                    foreach ($article->authors as $author) {
+                        $authorLinks[] = '<a href=".?action=viewArticleAuthor&amp;authorId=' . $author['id'] . '">' . 
+                                       htmlspecialchars($author['login']) . '</a>';
+                    }
+                    echo implode(', ', $authorLinks);
+                    ?>
+                </div>
+            <?php } ?>
+
+            <!-- ВЫВОДИМ SUMMARY ВМЕСТО CONTENT -->
+            <!--<p class="summary<?php echo $article->id?>"><?php echo htmlspecialchars($article->summary)?></p>-->
             <p class="summary<?php echo $article->id?>"><?php echo htmlspecialchars(mb_strimwidth($article->content, 0, 53, '...'))?></p>
             <img id="loader-identity" src="JS/ajax-loader.gif" alt="gif">
             
@@ -40,6 +67,3 @@
     <?php } ?>
     </ul>
     <p><a href="./?action=archive">Article Archive</a></p>
-<?php include "templates/include/footer.php" ?>
-
-    

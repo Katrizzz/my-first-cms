@@ -116,9 +116,42 @@ h3.categoryDescription {
   text-decoration: underline;
 }
 
-.showContent {
-    font-size : 14px;
-    float : right;
+/* Стили для подкатегорий */
+
+.subcategory {
+  font-style: italic;
+  font-weight: normal;
+  font-size: 60%;
+  color: #999;
+  display: block;
+  line-height: 2em;
+}
+
+.subcategory a {
+  color: #999;
+  text-decoration: underline;
+}
+
+.subcategory::before {
+  content: "Подкатегория: ";
+}
+
+/* Стили для авторов на главной странице */
+.authors {
+    font-size: 0.8em;
+    color: #666;
+    margin: 5px 0;
+    font-style: italic;
+}
+
+.authors a {
+    color: #666;
+    text-decoration: none;
+}
+
+.authors a:hover {
+    color: #eb6841;
+    text-decoration: underline;
 }
 
 
@@ -351,4 +384,47 @@ ul.ajax-load li {
     padding: 3px; /* Поля вокруг текста */
     font-size: 12px;
 }
-        
+
+/* Стили для checkbox */
+input[type="checkbox"] {
+    display: inline-block;
+    width: auto;
+    margin: 0;
+    padding: 0;
+    vertical-align: middle;
+}
+
+.checkbox-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 5px;
+}
+
+.checkbox-label {
+    display: inline;
+    float: none;
+    text-align: left;
+    width: auto;
+    margin: 0;
+    padding: 0;
+    font-weight: normal;
+}
+
+/* Специфичные стили для checkbox в формах */
+form input[type="checkbox"] {
+    width: auto;
+    margin: 0;
+    padding: 0;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+/* Переопределение стилей для метки checkbox */
+form li label[for="active"] {
+    float: none;
+    display: block;
+    text-align: left;
+    width: 100%;
+    margin-bottom: 5px;
+}

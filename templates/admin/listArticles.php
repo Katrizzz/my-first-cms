@@ -17,6 +17,8 @@
               <th>Publication Date</th>
               <th>Article</th>
               <th>Category</th>
+              <th>Subcategory</th>
+              <th>Authors</th>
               <th>Active</th>
             </tr>
 
@@ -34,6 +36,38 @@
                   } else {
                     echo "Без категории";
                   } ?>
+                </td>
+                <td>
+                  <?php
+                  if (isset($article->subcategoryId) && isset($results['subcategories'][$article->subcategoryId])) {
+                    echo $results['subcategories'][$article->subcategoryId]->name;
+                  } else {
+                    echo "Без подкатегории";
+                  } ?>
+                </td>
+                <td>
+                  <?php
+                  // Получаем авторов статьи
+                  $authors = $article->getAuthors();
+                  if (!empty($authors)) {
+                    $authorNames = array();
+                    foreach ($authors as $author) {
+                      // Проверяем структуру массива автора
+                      if (is_array($author) && isset($author['login'])) {
+                        $authorNames[] = $author['login'];
+                      } elseif (is_object($author) && isset($author->login)) {
+                        $authorNames[] = $author->login;
+                      }
+                    }
+                    if (!empty($authorNames)) {
+                      echo htmlspecialchars(implode(', ', $authorNames));
+                    } else {
+                      echo "No authors";
+                    }
+                  } else {
+                    echo "No authors";
+                  }
+                  ?>
                 </td>
                 <td>
                   <?php if ($article->active == 1): ?>

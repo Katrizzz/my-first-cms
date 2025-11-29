@@ -44,11 +44,53 @@
               </li>
 
               <li>
+                <label for="subcategoryId">Article Subcategory</label>
+                <select name="subcategoryId" id="subcategoryId">
+                  <option value="">No Subcategory</option>
+                  <?php
+                  // Показываем только подкатегории, принадлежащие выбранной категории
+                  $currentCategoryId = $results['article']->categoryId;
+                  foreach ($results['subcategories'] as $subcategory) {
+                    if ($subcategory->categoryId == $currentCategoryId) {
+                      $selected = ($results['article']->subcategoryId == $subcategory->id) ? "selected" : "";
+                      echo '<option value="' . $subcategory->id . '" ' . $selected . '>' .
+                        htmlspecialchars($subcategory->name) . '</option>';
+                    }
+                  }
+                  ?>
+                </select>
+                <div style="font-size: 0.8em; color: #666; margin-top: 5px;">
+                  Подкатегории отображаются только для выбранной категории
+                </div>
+              </li>
+
+              <!-- Article Authors -->
+              <li>
+                <label for="authors">Article Authors</label>
+                <select name="authors[]" id="authors" multiple size="5" style="height: auto;">
+                  <?php foreach ($results['users'] as $user) { ?>
+                    <option value="<?php echo $user->id ?>"
+                      <?php
+                      // Проверяем, выбран ли этот пользователь как автор
+                      if (isset($results['currentAuthorIds']) && in_array($user->id, $results['currentAuthorIds'])) {
+                        echo ' selected="selected"';
+                      }
+                      ?>>
+                      <?php echo htmlspecialchars($user->login) ?>
+                    </option>
+                  <?php } ?>
+                </select>
+                <div style="font-size: 0.8em; color: #666; margin-top: 5px;">
+                  Для выбора нескольких авторов удерживайте Ctrl (Cmd на Mac)
+                </div>
+              </li>
+
+              <li>
                 <label for="publicationDate">Publication Date</label>
                 <input type="date" name="publicationDate" id="publicationDate" placeholder="YYYY-MM-DD" required maxlength="10" value="<?php echo $results['article']->publicationDate ? date( "Y-m-d", $results['article']->publicationDate ) : "" ?>" />
               </li>
 
-              li>
+              <li>
                 <label for="active">Article Status</label>
                 <input type="checkbox" name="active" id="active" <?php echo $results['article']->active ? "checked" : "" ?> /> Active
               </li>
