@@ -26,7 +26,7 @@
                     </span>
                 <?php } ?>
             </h2>
-            <p class="summary"><?php echo htmlspecialchars($article->summary)?></p>
+            <p class="summary<?php echo $article->id?>"><?php echo htmlspecialchars(mb_strimwidth($article->content, 0, 53, '...'))?></p>
             <img id="loader-identity" src="JS/ajax-loader.gif" alt="gif">
             
             <ul class="ajax-load">
